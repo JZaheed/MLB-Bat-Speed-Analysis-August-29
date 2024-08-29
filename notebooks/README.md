@@ -1,1 +1,1 @@
-This file the my Jupyter notebook
+This folder contains my Jupyter notebook
