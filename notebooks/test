@@ -1,0 +1,41 @@
+# Count unique pitchers
+lhp_unique = lhp_ff.drop_duplicates(subset=['NAME_FIRST_LAST', 'SEASON', 'arm_slot'])
+slot_counts = lhp_unique.groupby(['SEASON', 'arm_slot'])['NAME_FIRST_LAST'].count().reset_index()
+slot_counts.rename(columns={'NAME_FIRST_LAST': 'count'}, inplace=True)
+
+slot_counts['total'] = slot_counts.groupby(['SEASON'])['count'].transform('sum')
+slot_counts['percent'] = slot_counts['count'] / slot_counts['total'] * 100
+
+slot_counts = slot_counts.sort_values(['SEASON', 'percent'], ascending=[True, False])
+
+arm_slots = sorted(slot_counts['arm_slot'].unique())
+
+plt.figure(figsize = (12,6))
+ax = sns.barplot(
+    data = slot_counts,
+    x='SEASON',
+    y='count',
+    hue='arm_slot',
+    palette = slot_palette,
+    dodge = True
+)
+
+for i, row in slot_counts.iterrows():
+    season = row['SEASON']
+    y_val = row['count']
+    percent = row['percent']
+    color = slot_palette[row['arm_slot']]
+
+    ax.text(
+        season, y_val + 0.5,
+        f"{int(y_val)}",
+        ha = 'center', fontsize = 8, color = 'white',
+        bbox=dict(boxstyle='round,pad=0.25', facecolor=color, edgecolor='none', alpha=0.8)
+    )
+
+ax.set_title("LHP: Pitcher Counts")
+ax.set_ylabel("Number of Pitchers")
+ax.set_xlabel("Season")
+ax.legend(title = "Arm Slot", bbox_to_anchor=(1.01, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
